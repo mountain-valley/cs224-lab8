@@ -1,0 +1,17 @@
+irmovq $0,%rax  # use rax to store the total sum
+
+irmovq $0,%r9        # Constant 0
+irmovq $8, %r8
+irmovq list, %rsi  # store the address of src in %rsi
+
+
+loop:   mrmovq (%rsi),%r10   # Get the value at the memory address stored in %rsi and put the value in %r10
+    addq %r10, %rax  #add the value to the sum
+    
+    # get the pointer to the next value
+    mrmovq 8(%rsi),%r11 
+    rrmovq %r11, %rsi
+    
+    # check if we have reached the end
+    subq %r9,%r11   # subtract 0 from the value in %r10
+test:   jne    loop          # Stop when 0

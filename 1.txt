@@ -1,0 +1,25 @@
+1.a)  
+irmovq $10, %rax
+
+1.b)  
+addq %rax, %rcx
+
+1.c)  
+irmovq $0, %rbx
+subq %rbx, %rax
+je ifzero
+              
+1.d)
+rrmovq %rax, %rcx
+rrmovq %rbx, %rax
+rrmovq %rcx, %rbx
+
+1.e)
+irmovq a, %rax
+mrmovq (%rax), %rdx
+
+1.f)
+irmovq $0xbbbb, %rax
+irmovq b, %rbx
+rmmovq %rax, (%rbx)
+

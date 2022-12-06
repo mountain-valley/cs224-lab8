@@ -1,0 +1,18 @@
+irmovq $1,%r9        # Constant 1
+irmovq $8, %r8
+irmovq src, %rsi  # store the address of src in %rsi
+irmovq dest, %rdi  # store the address of dest in %rdi
+
+loop:   mrmovq (%rsi),%r10   # Get the value at the memory address stored in %rsi and put the value in %r10
+    mrmovq (%rdi),%r11   # Get the value at the memory address stored in %rdi and put the value in %r11
+    # switch the values in memory
+    rmmovq %r11, (%rsi)
+    rmmovq %r10, (%rdi)
+    
+    #increase the memory location stored in %r10 and %r11
+    addq %r8, %rsi
+    addq %r8, %rdi
+    
+    # decrement pointer
+    subq %r9,%rax        # count--.  Set CC
+test:   jne    loop          # Stop when 0

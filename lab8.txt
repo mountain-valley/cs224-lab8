@@ -1,0 +1,183 @@
+1.a)  
+irmovq $10, %rax
+
+1.b)  
+addq %rax, %rcx
+
+1.c)  
+irmovq $0, %rbx
+subq %rbx, %rax
+je ifzero
+              
+1.d)
+rrmovq %rax, %rcx
+rrmovq %rbx, %rax
+rrmovq %rcx, %rbx
+
+1.e)
+irmovq a, %rax
+mrmovq (%rax), %rdx
+
+1.f)
+irmovq $0xbbbb, %rax
+irmovq b, %rbx
+rmmovq %rax, (%rbx)
+
+2.
+irmovq $3,%rax  # size of block in memory
+
+irmovq $1,%r9        # Constant 1
+irmovq $8, %r8
+irmovq src, %rsi  # store the address of src in %rsi
+irmovq dest, %rdi  # store the address of dest in %rdi
+
+loop:   mrmovq (%rsi),%r10   # Get the value at the memory address stored in %rsi and put the value in %r10
+    mrmovq (%rdi),%r11   # Get the value at the memory address stored in %rdi and put the value in %r11
+    # switch the values in memory
+    rmmovq %r11, (%rsi)
+    rmmovq %r10, (%rdi)
+    
+    #increase the memory location stored in %r10 and %r11
+    addq %r8, %rsi
+    addq %r8, %rdi
+    
+    # decrement pointer
+    subq %r9,%rax        # count--.  Set CC
+test:   jne    loop          # Stop when 0
+
+.align 8
+# Source block
+src:
+.quad 0xaaaa
+.quad 0xbbbb
+.quad 0xcccc
+# Destination block
+dest:
+.quad 0x1111
+.quad 0x2222
+.quad 0x3333
+
+
+3.
+irmovq $0,%rax  # use rax to store the total sum
+
+irmovq $0,%r9        # Constant 0
+irmovq $8, %r8
+irmovq list, %rsi  # store the address of src in %rsi
+
+
+loop:   mrmovq (%rsi),%r10   # Get the value at the memory address stored in %rsi and put the value in %r10
+    addq %r10, %rax  #add the value to the sum
+    
+    # get the pointer to the next value
+    mrmovq 8(%rsi),%r11 
+    rrmovq %r11, %rsi
+    
+    # check if we have reached the end
+    subq %r9,%r11   # subtract 0 from the value in %r10
+test:   jne    loop          # Stop when 0
+
+.align 8
+list:
+ele1:
+    .quad 0x01
+    .quad ele2
+ele2:
+    .quad 0x10
+    .quad ele3
+ele3:
+    .quad 0x100
+    .quad ele4
+elex:
+    .quad 0x1000
+    .quad ele1
+ele4:
+    .quad 0x10000
+    .quad 0
+
+
+4.
+irmovq $10,%rax  # size of block in memory
+irmovq $1, %rbx 
+subq %rbx, %rax   # decrease %rax by 2
+rrmovq %rax, %rcx  # set counter
+
+irmovq $0, %r10      # Constant 0
+irmovq $1,%r9        # Constant 1
+irmovq $8, %r8
+irmovq data, %rsi  # store the address of data in %rsi
+irmovq data, %rdi
+irmovq bool, %rbp
+
+rmmovq %r9, (%rbp)  # set bool to TRUE
+
+main:
+    jmp while
+    
+# swaps A[i] and A[i+1]
+swap: 
+    # switch the values in memory
+    mrmovq (%rdi), %r11   
+    mrmovq 8(%rdi), %r12
+    rmmovq %r12, (%rdi)
+    rmmovq %r11, 8(%rdi)
+    rmmovq %r9, (%rbp)  # set bool to TRUE
+    jmp decrement
+
+loop:  
+    # get A[i] and store in %r11
+    mrmovq (%rdi), %r11
+    # get A[i+1] and store in %r12
+    mrmovq 8(%rdi), %r12
+    
+    # A[i] - A[i+1], which will be negative if A[i+1] is greater
+    subq %r12, %r11  #%r11 - %r12
+    jg swap  #if A[i] > A[i+1}, then swap
+    
+# decrement counter and go to next iteration of loop    
+decrement:   
+    # increase pointer to next location
+    addq %r8, %rdi
+    subq %r9, %rcx      # count--.  Set CC
+    jne    loop          # Stop when 0
+
+while:  
+    # check if bool is TRUE
+    mrmovq (%rbp), %rbx  # get value of bool
+    subq %r10, %rbx
+    
+    # set bool to FALSE
+    rmmovq %r10, (%rbp)
+    
+    # reset pointer to beginning of array
+    irmovq data, %rdi
+    # reset counter
+    rrmovq %rax, %rcx
+    # jump to loop if bool was not equal to 0 (before the last line of code)
+    jne loop
+
+checker:   
+    mrmovq (%rdi),%rdx   # Get *start
+    addq %r8,%rdi        # start++
+    subq %r9,%rax        # count--.  Set CC
+test:   jne    checker 
+
+mrmovq (%rdi),%rdx   # Get *start
+
+
+.align 8
+
+data:
+    .quad 0x05
+    .quad 0x0a
+    .quad 0x08
+    .quad 0x02
+    .quad 0x01
+    .quad 0x03
+    .quad 0x06
+    .quad 0x04
+    .quad 0x09
+    .quad 0x07
+bool:
+    .quad 0x00
+    
